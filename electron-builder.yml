@@ -1,0 +1,64 @@
+# 개인용 .app 묶기 (9단계, [Q-31]).
+#
+# PRD 5절: "개인 사용을 목적으로 하며 공개 배포하지 않는다."
+# 여기서 만드는 것은 **이 맥에서 쓰는 실행 파일 하나**다.
+# 서명·공증·App Store·자동 업데이트는 범위 밖이다 ([Q-22]~[Q-24]).
+# 다른 사람에게 건네는 것을 전제하지 않는다.
+
+appId: dev.sxcrxta.experiment-agent
+
+# **이름은 ASCII 여야 한다.** 한글로 두면 electron-builder 가 실행 파일과 헬퍼 번들의 **파일 이름**까지
+# 한글로 바꾸는데, 그렇게 묶은 앱은 Apple Silicon 에서 켜자마자 조용히 죽는다
+# (SIGTRAP, 종료 코드 133, stderr 에 아무것도 남지 않는다). 실제로 겪고 확인했다 ([Q-31]).
+#
+# 이 이름은 두 가지를 더 정한다.
+#  - `~/Library/Application Support/<이름>/` — 기존 기록이 있는 곳. 바뀌면 기록을 못 찾는다
+#    (그래서 코드에서도 `DATA_DIR_NAME` 으로 못박아 두었다)
+#  - 메뉴 막대와 Finder 에 보이는 이름 — 그쪽은 아래 CFBundleDisplayName 이 한글로 덮는다
+productName: experiment-agent
+copyright: 개인 사용
+
+directories:
+  output: release
+  buildResources: build
+
+# 묶은 뒤 애드혹 서명을 다시 붙인다. Apple Silicon 은 서명이 내용과 맞지 않는 앱을 실행하지 않는다.
+afterPack: build/after-pack.cjs
+
+# 앱 안에 넣을 것.
+#
+# - out/**            electron-vite 가 만든 main · preload · renderer
+# - package.json      Electron 이 진입점(main)과 앱 이름을 읽는다
+# - migrations/*.sql  DB 스키마. 코드가 아니라 파일로 읽으므로 직접 넣어야 한다
+#   (`src/main/index.ts` 의 resolveMigrationsDir 이 이 위치를 후보로 본다)
+#
+# node_modules 의 실행 의존성(better-sqlite3 · fflate · saxes)은 electron-builder 가 알아서 넣는다.
+files:
+  - out/**
+  - package.json
+  - src/adapters/repo/migrations/*.sql
+  - '!**/*.map'
+
+# better-sqlite3 은 .node 바이너리를 파일 경로로 읽는다. asar 안에서는 읽지 못하므로 밖에 둔다.
+asarUnpack:
+  - node_modules/better-sqlite3/**
+
+mac:
+  category: public.app-category.education
+  # 아이콘은 `build/icon.py` 가 그린다. 그림 파일을 주워 오지 않고 코드로 만든다.
+  icon: build/icon.icns
+  # Finder·Dock 에 보이는 이름만 한글로 둔다. 파일 이름은 위 productName(ASCII) 그대로다.
+  extendInfo:
+    CFBundleDisplayName: 실험보고서 학습 보조
+  target:
+    # dir = .app 하나만 만든다. DMG·ZIP 은 만들지 않는다 (건네줄 일이 없다).
+    - target: dir
+      arch: arm64
+  # 인증서로 서명하지 않는다. 대신 afterPack 이 애드혹 서명을 붙인다.
+  # 이 맥에서 직접 빌드해 쓰므로 격리(quarantine) 표식이 붙지 않는다.
+  identity: null
+  # 공증을 시도하지 않는다. Apple Developer 계정이 필요하고 범위 밖이다.
+  notarize: false
+
+# 개인 사용이라 게시 대상이 없다. electron-builder 가 어디에도 올리지 않게 한다.
+publish: null

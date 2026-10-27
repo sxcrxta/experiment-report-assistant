@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob:" />
+    <title>실험보고서 학습 보조</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="app-toolbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span>보고서 자가 검토</div>
+      <nav class="workspace-tabs" aria-label="작업 화면" role="tablist">
+        <button id="tab-document" type="button" role="tab" aria-controls="document" aria-selected="true" data-tab="document">개요</button>
+        <button id="tab-review" type="button" role="tab" aria-controls="review" aria-selected="false" data-tab="review">검토·다듬기</button>
+        <button id="tab-rubric" type="button" role="tab" aria-controls="rubric" aria-selected="false" data-tab="rubric">평가 지침</button>
+        <button id="tab-growth" type="button" role="tab" aria-controls="growth" aria-selected="false" data-tab="growth">성장 기록</button>
+      </nav>
+      <div class="toolbar-actions">
+        <select id="compact-document" class="compact-only" aria-label="보고서"></select>
+        <button id="refresh" type="button" hidden title="저장한 HWPX 를 읽지 못했습니다. 다시 읽어 봅니다.">↻ <span>다시 읽기</span></button>
+        <button id="compact-toggle" class="icon-button" type="button" aria-pressed="false" aria-label="보조 창으로" title="보조 창으로 (한글 옆에 좁게, 늘 위에)">◧</button>
+        <button id="settings-toggle" class="icon-button" type="button" aria-label="설정" title="설정">⚙</button>
+      </div>
+    </header>
+    <div class="app-workspace">
+      <aside class="report-sidebar" aria-label="보고서 목록">
+        <div class="sidebar-heading"><strong>보고서</strong>
+          <button id="choose" type="button" class="icon-button" aria-label="보고서 불러오기" title="보고서 불러오기">＋</button>
+        </div>
+        <ul id="documents" class="report-list"></ul>
+      </aside>
+      <main class="workspace-content">
+        <section id="document" class="workspace-pane" role="tabpanel" aria-labelledby="tab-document"></section>
+        <section id="rubric" class="workspace-pane" role="tabpanel" aria-labelledby="tab-rubric" hidden></section>
+        <section id="review" class="workspace-pane" role="tabpanel" aria-labelledby="tab-review" hidden></section>
+        <section id="growth" class="workspace-pane" role="tabpanel" aria-labelledby="tab-growth" hidden></section>
+        <section id="settings" class="workspace-pane settings-pane" aria-label="설정" hidden>
+          <div class="page-heading"><h1>설정</h1><button id="settings-close" type="button">닫기</button></div>
+          <div class="settings-content"><section id="ai-settings"></section>
+            <details class="local-info"><summary>앱 정보와 저장 위치</summary><dl id="info"></dl></details>
+          </div>
+        </section>
+      </main>
+    </div>
+    <footer class="app-statusbar"><span id="notice" role="status" aria-live="polite"></span><span id="connection-status">로컬 작업 공간</span></footer>
+    <dialog id="import-dialog" class="import-dialog" aria-labelledby="import-title">
+      <form id="import-form"><h2 id="import-title">보고서 불러오기</h2>
+        <label for="subject">과목</label><input id="subject" type="text" placeholder="예: 일반화학실험 (선택)" />
+        <label for="import-rubric">평가 지침</label><select id="import-rubric"></select>
+        <div class="dialog-actions"><button id="import-cancel" type="button">취소</button><button type="submit" class="primary-button">HWPX 파일 선택</button></div>
+      </form>
+    </dialog>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
